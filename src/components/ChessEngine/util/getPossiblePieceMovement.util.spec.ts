@@ -43,7 +43,12 @@ describe('resolveVector', () => {
     }).sort(sortFn)
 
     result = (
-      squares.map((to) => ({ from, to, type: 'normal' })) as PossibleMove[]
+      squares.map((to) => ({
+        from,
+        to,
+        type: 'normal',
+        notation: `${from}${to}`,
+      })) as PossibleMove[]
     ).sort(sortFn)
 
     expect(moves).toEqual(result)
@@ -84,12 +89,14 @@ describe('resolveVector', () => {
       {
         from,
         to: 'c3',
+        notation: 'd4c3',
         type: 'capture',
         taken: targetOne,
       } as const,
       {
         from,
         to: 'c5',
+        notation: 'd4c5',
         type: 'capture',
         taken: targetTwo,
       } as const,
@@ -98,6 +105,7 @@ describe('resolveVector', () => {
           ({
             from,
             to,
+            notation: `d4${to}`,
             type: 'normal',
           }) as const,
       ),

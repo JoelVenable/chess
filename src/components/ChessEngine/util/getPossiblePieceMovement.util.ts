@@ -6,7 +6,11 @@ import {
   isVectorDiagonal,
 } from './ChessPieceMovement'
 import { getTargetSquare } from './getSquareDetail.util'
-import { PossibleMove, PossibleMovePromotion } from './possibleMove'
+import {
+  PossibleMove,
+  PossibleMovePromotion,
+  getPromoteNotation,
+} from './possibleMove'
 
 type ResolveVectorArgs = GetPossiblePieceMovementArgs & {
   vector: MovementVector
@@ -87,6 +91,7 @@ function resolveVector({
                 from: piece.location,
                 to: square,
                 type: 'normal',
+                notation: `${piece.location}${square}`,
               })
           }
           break
@@ -104,6 +109,7 @@ function resolveVector({
                     type: 'promotion',
                     promoteTo: promoteType,
                     taken: targetSquare.piece,
+                    notation: `${piece.location}${square}${getPromoteNotation(promoteType)}`,
                   }),
                 ),
               )
@@ -113,6 +119,7 @@ function resolveVector({
                 to: square,
                 type: 'capture',
                 taken: targetSquare.piece,
+                notation: `${piece.location}${square}`,
               })
           }
 

@@ -11,7 +11,28 @@ import {
   ChessPieceType,
   ChessPieceProps,
   ChessPieceStaticProps,
+  ChessPieceStorageNotation,
+  ChessPiecePropsSchema,
+  ChessPieceStorageNotationSchema,
 } from './ChessPiece.types'
+
+const charMap = {
+  P: 'pawn',
+  R: 'rook',
+  N: 'knight',
+  B: 'bishop',
+  Q: 'queen',
+  K: 'king',
+} as const
+
+const typeMap = {
+  pawn: 'P',
+  rook: 'R',
+  knight: 'N',
+  bishop: 'B',
+  queen: 'Q',
+  king: 'K',
+} as const
 
 export class ChessPiece {
   #type: ChessPieceType
@@ -76,15 +97,11 @@ export class ChessPiece {
     return this.type === 'king'
   }
 
-  constructor({
-    owner,
-    location,
-    movedLastTurn,
-    qtyMoves,
-    type,
-  }: ChessPieceProps) {
+  constructor(props: ChessPieceProps) {
+    const { owner, location, movedLastTurn, qtyMoves, type } =
+      ChessPiecePropsSchema.parse(props)
     this.#owner = owner
-    this.#location = location
+    this.#location = location as ChessSquareNotation
     this.#movedLastTurn = movedLastTurn
     this.#qtyMoves = qtyMoves
     this.#type = type
@@ -112,6 +129,29 @@ export class ChessPiece {
       case 'black':
         return rank === '2'
     }
+  }
+
+  toString() {
+    return `${this.owner} ${this.type} at ${this.location}, lastMoved: ${this.movedLastTurn}, moves: ${this.qtyMoves}`
+  }
+
+  serialize(): ChessPieceStorageNotation {
+    const o = this.owner === 'white' ? 'w' : 'b'
+    const t = typeMap[this.type]
+    const l = this.location
+    const m = this.movedLastTurn ? 'Y' : 'N'
+    const q = `${this.qtyMoves}`
+    return `${o}${t}${l}${m}${q}` as ChessPieceStorageNotation
+  }
+
+  static deserialize(serialized: string) {
+    const str = ChessPieceStorageNotationSchema.parse(serialized)
+    const owner = str[0] === 'w' ? 'white' : 'black'
+    const type = charMap[str[1] as keyof typeof charMap]
+    const location = str.slice(2, 4) as ChessSquareNotation
+    const movedLastTurn = str[4] === 'Y'
+    const qtyMoves = parseInt(str.slice(5))
+    return new ChessPiece({ owner, location, movedLastTurn, qtyMoves, type })
   }
 
   getMovementSquares(): MovementVectors {

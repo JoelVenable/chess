@@ -62,6 +62,7 @@ describe('getEnPassantCandidates', () => {
       {
         from: whitePawn.location,
         to: 'e6',
+        notation: 'd5e6',
         taken: blackPawn,
         type: 'en-passant',
       },
@@ -99,14 +100,47 @@ describe('getEnPassantCandidates', () => {
       {
         from: whitePawn.location,
         taken: blackPawn1,
+        notation: 'd5e6',
         to: 'e6',
         type: 'en-passant',
       },
       {
         from: whitePawnTwo.location,
         taken: blackPawn1,
+        notation: 'f5e6',
         type: 'en-passant',
         to: 'e6',
+      },
+    ])
+  })
+
+  it('handles en passant from black player', () => {
+    const blackPawn = ChessPiece.Pawn({
+      owner: 'black',
+      location: 'd4',
+      movedLastTurn: false,
+      qtyMoves: 2,
+    })
+
+    const whitePawn = ChessPiece.Pawn({
+      owner: 'white',
+      location: 'e4',
+      movedLastTurn: true,
+      qtyMoves: 1,
+    })
+
+    const enPassantCandidates = getEnPassantCandidates({
+      pieces: [blackPawn, whitePawn],
+      activePlayer: 'black',
+    })
+
+    expect(enPassantCandidates).toEqual([
+      {
+        from: blackPawn.location,
+        to: 'e3',
+        notation: 'd4e3',
+        taken: whitePawn,
+        type: 'en-passant',
       },
     ])
   })

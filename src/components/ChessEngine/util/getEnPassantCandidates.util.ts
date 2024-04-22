@@ -16,15 +16,15 @@ export const getEnPassantCandidates = ({
   const enemyPawnEligible =
     allPawns.filter((p) => {
       if (p.owner === activePlayer) return false
-      if (p.isValidEnPassantTarget) return true
-      return false
+      const isValid = p.isValidEnPassantTarget
+      return isValid
     })[0] ?? null
 
   if (!enemyPawnEligible) return []
 
   return allPawns
-    .filter((p) => p.owner === activePlayer)
     .filter((p) => {
+      if (p.owner !== activePlayer) return false
       const left = translateSquare({
         square: p.location,
         files: -1,
@@ -35,16 +35,21 @@ export const getEnPassantCandidates = ({
         files: 1,
         ranks: 0,
       })
-      return [left, right].includes(enemyPawnEligible.location)
+      return [left, right].filter(Boolean).includes(enemyPawnEligible.location)
     })
-    .map<PossibleMoveEnPassant>((p) => ({
-      from: p.location,
-      taken: enemyPawnEligible,
-      type: 'en-passant',
-      to: translateSquare({
+    .map<PossibleMoveEnPassant>((p) => {
+      const to = translateSquare({
         square: enemyPawnEligible.location,
         files: 0,
         ranks: activePlayer === 'white' ? -1 : 1,
-      })!,
-    }))
+      })!
+
+      return {
+        from: p.location,
+        taken: enemyPawnEligible,
+        type: 'en-passant',
+        notation: `${p.location}${to}`,
+        to,
+      }
+    })
 }
